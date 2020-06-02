@@ -22,10 +22,15 @@
     <link rel="stylesheet" href="lib/css/monokai.css">
     <!-- <link rel="stylesheet" href="lib/css/zenburn.css"> -->
     <style>
+        .reveal pre {
+            font-size: 0.4em;
+        }
+
         .reveal pre > code {
             font-family: Consolas, Monospace, sans-serif;
         }
 
+        /* show only current fragment, hide others */
         .reveal .fragment.visible:not(.current-fragment) {
             display: none;
         }
@@ -74,7 +79,7 @@
 
         <section>
             <h2>RxJS in Angular</h2>
-            <p>RxJS is used throughout Angular APIs to handle asynchrony.</p>
+            <p>RxJS is used throughout Angular APIs to handle <strong>asynchrony</strong>.</p>
             <ul class="fragment">
                 <li>DOM events</li>
                 <li>requests to APIs</li>
@@ -185,8 +190,8 @@ subscription.unsubscribe();
         </section>
 
         <section>
-            <h3>Observables provide operations</h3>
-            <pre><code class="ts" data-trim>
+            <h3>Observables provide operators</h3>
+            <pre><code class="ts" data-trim data-line-numbers>
 const characters$ = of('a', 'b', 'c');
 
 characters$
@@ -202,10 +207,6 @@ characters$
 					</code></pre>
 
             <aside class="notes">
-                <ul>
-                    <li>stop receiving values</li>
-                    <li>important to unsubscribe to avoid memory leaks</li>
-                </ul>
             </aside>
         </section>
 
@@ -218,6 +219,213 @@ characters$
                 <li>provide operations on that stream</li>
             </ul>
         </section>
+
+        <section>
+            <h2>Observables in Angular APIs</h2>
+            <div style="display: flex; justify-content: space-evenly">
+                <aside>
+                    <img src="images/angular.svg" alt="Logo" style="width: 13rem">
+                </aside>
+                <div>
+                    <ul>
+                        <li>Http Client</li>
+                        <li>Async Pipe</li>
+                        <li>Forms</li>
+                        <li>Router</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <section>
+            <pre><code class="ts" data-noescape data-line-numbers>@Injectable()
+export class ProductService {
+  private readonly url = 'https://acme.com/products';
+
+  constructor(private http: HttpClient) {}
+
+  loadProducts(): Observable&lt;ProductsResponse&gt; {
+    return this.http.get&lt;ProductsResponse&gt;(this.url);
+  }
+}
+					</code></pre>
+            </section>
+            <section>
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+  template:
+  `&lt;ul&gt;
+     &lt;li *ngFor="let p of products">{{p.name}}: {{p.price}}&lt;/li&gt;
+   &lt;/ul&gt;`
+})
+export class ProductsComponent implements OnInit {
+  products: Product[];
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit() {
+    this.productService.loadProducts().subscribe(
+      response => (this.products = response.products)
+    );
+  }
+}
+					</code></pre>
+            </section>
+        </section>
+
+        <section>
+            <section>
+            <pre><code class="ts" data-noescape data-line-numbers>@Injectable()
+export class ProductService {
+  private readonly url = 'https://acme.com/products';
+
+  constructor(private http: HttpClient) {}
+
+  loadProducts(): Observable&lt;Product[]&gt; {
+    return this.http.get&lt;ProductsResponse&gt;(this.url)
+      .pipe(
+        map(response => response.products)
+      );
+  }
+}
+					</code></pre>
+            </section>
+            <section>
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+  template:
+  `&lt;ul&gt;
+     &lt;li *ngFor="let p of products">{{p.name}}: {{p.price}}&lt;/li&gt;
+   &lt;/ul&gt;`
+})
+export class ProductsComponent implements OnInit {
+  products: Product[];
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit() {
+    this.productService.loadProducts().subscribe(
+      products => (this.products = products)
+    );
+  }
+}
+					</code></pre>
+            </section>
+        </section>
+
+        <section>
+            <section>
+            <pre><code class="ts" data-noescape data-line-numbers>@Injectable()
+export class ProductService {
+  private readonly url = 'https://acme.com/products';
+
+  constructor(private http: HttpClient) {}
+
+  saveProduct(product: Product): Observable&lt;void&gt; {
+    return this.http.post&lt;void&gt;(this.url, product);
+  }
+}
+					</code></pre>
+            </section>
+            <section data-transition="slide-in none-out">
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+})
+export class ProductsComponent {
+  product: Product;
+
+  constructor(private productService: ProductService) {}
+
+  saveProduct() {
+    this.productService.saveProduct(this.product);
+  }
+}
+					</code></pre>
+                <aside class="notes">
+                    What is the problem? What happens when <code>saveProduct</code> is called?
+                </aside>
+            </section>
+            <section data-transition="none-in slide-out">
+                <pre><code class="ts" data-noescape data-line-numbers="10">@Component({
+  selector: 'app-products',
+})
+export class ProductsComponent {
+  product: Product;
+
+  constructor(private productService: ProductService) {}
+
+  saveProduct() {
+    this.productService.saveProduct(this.product).subscribe();
+  }
+}
+					</code></pre>
+            </section>
+        </section>
+
+        <section>
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+  template:
+  `&lt;ul&gt;
+     &lt;li *ngFor="let p of products">{{p.name}}: {{p.price}}&lt;/li&gt;
+   &lt;/ul&gt;`
+})
+export class ProductsComponent implements OnInit {
+  products: Product[];
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit() {
+    this.productService.loadProducts().subscribe(
+      products => (this.products = products)
+    );
+  }
+}
+					</code></pre>
+            <aside class="notes">
+                Back to our template to show the list of products. What's wrong here?
+            </aside>
+        </section>
+
+        <section>
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+  template:
+  `&lt;ul&gt;
+     &lt;li *ngFor="let p of products">{{p.name}}: {{p.price}}&lt;/li&gt;
+   &lt;/ul&gt;`
+})
+export class ProductsComponent implements OnInit {
+  products: Product[];
+  private subscription: Subscription
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit() {
+    this.productService.loadProducts().subscribe(
+      products => (this.products = products)
+    );
+  }
+}
+					</code></pre>
+            <aside class="notes">
+                Back to our template to show the list of products. What's wrong here?
+            </aside>
+        </section>
+        <!-- TODO -->
+        <!-- Operators that should be handled: -->
+        <!-- filter, -->
+        <!-- map,-->
+        <!-- tap,-->
+        <!-- mergeMap/switchMap,-->
+        <!-- takeUntil,-->
+        <!-- combineLatest-->
+
+        <!-- Optional: -->
+        <!-- share -->
+        <!-- shareReplay -->
+
         <!-- Example of nested vertical slides -->
         <section>
             <section>
