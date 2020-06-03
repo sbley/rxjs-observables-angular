@@ -413,6 +413,132 @@ export class ProductsComponent implements OnInit {
                 Back to our template to show the list of products. What's wrong here?
             </aside>
         </section>
+
+        <section>
+            <h3>Always unsubscribe from Observables to avoid memory leaks</h3>
+            <aside class="notes">
+                There are three common ways to unsubscribe (presented in next slides)
+            </aside>
+        </section>
+
+        <section>
+            <h3>Subscription</h3>
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+})
+export class ProductsComponent implements OnInit, OnDestroy {
+  products: Product[];
+  private subscription: Subscription;
+
+  constructor(private productsService: ProductsService) {}
+
+  ngOnInit() {
+    this.subscription = this.productsService
+      .loadProducts()
+      .subscribe((products) => (this.products = products));
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+}
+					</code></pre>
+            <aside class="notes">
+                Remember subscription and call `unsubscribe` in `ngOnDestroy`
+            </aside>
+        </section>
+
+        <section>
+            <h3>takeUntil</h3>
+            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+})
+export class ProductsComponent implements OnInit, OnDestroy {
+  products: Product[];
+  private destroyed$ = new Subject&lt;void&gt;();
+
+  constructor(private productsService: ProductsService) {}
+
+  ngOnInit() {
+    this.productsService
+      .loadProducts()
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe((products) => (this.products = products));
+  }
+
+  ngOnDestroy() {
+    this.destroyed$.next();
+  }
+}
+					</code></pre>
+            <aside class="notes">
+                Use Async Pipe
+            </aside>
+        </section>
+
+        <section>
+            <h3>Async Pipe</h3>
+            <section data-transition="slide-in none-out">
+            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+  template:
+  `&lt;ul&gt;
+     &lt;li *ngFor="let p of products | async">{{p.name}}: {{p.price}}&lt;/li&gt;
+   &lt;/ul&gt;`
+})
+export class ProductsComponent implements OnInit {
+  products$: Observable&lt;Product[]&gt;
+
+  constructor(private productsService: ProductsService) {}
+
+  ngOnInit() {
+    this.products$ = this.productsService.loadProducts();
+  }
+}
+					</code></pre>
+            <aside class="notes">
+                Subscribes and automatically unsubscribes when component is destroyed
+            </aside>
+            </section>
+            <section data-transition="none-in slide-out">
+            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-products',
+  template:
+  `&lt;ul&gt;
+     &lt;li *ngFor="let p of products | async">{{p.name}}: {{p.price}}&lt;/li&gt;
+   &lt;/ul&gt;`
+})
+export class ProductsComponent {
+  products$: Observable&lt;Product[]&gt; = this.productsService.loadProducts();
+
+  constructor(private productsService: ProductsService) {}
+}
+					</code></pre>
+                <aside class="notes">
+                  We don't even need <code>ngOnInit</code> anymore
+                </aside>
+            </section>
+        </section>
+        <section>
+            <h2>Async Pipe</h2>
+            <ul>
+                <li>subscribes to an Observable</li>
+                <li>automatically unsubscribes when the component is destroyed</li>
+                <li>triggers change detection</li>
+            </ul>
+            <aside class="notes">
+              Essential for OnPush change detection strategy
+            </aside>
+        </section>
+
+        <section>
+            <h2>Summary</h2>
+            <ul>
+                <li>HTTP Client API uses Observables</li>
+                <li>Always unsubscribe from Observables</li>
+                <li>Use Async Pipe wherever possible</li>
+            </ul>
+        </section>
         <!-- TODO -->
         <!-- Operators that should be handled: -->
         <!-- filter, -->
