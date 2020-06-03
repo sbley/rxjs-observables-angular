@@ -31,7 +31,7 @@
         }
 
         /* show only current fragment, hide others */
-        .reveal .fragment.visible:not(.current-fragment) {
+        .reveal .fragment.visible:not(.current-fragment):not(span) {
             display: none;
         }
     </style>
@@ -93,13 +93,11 @@
 
         <section>
             <h2>Observables</h2>
-            <p>
             <ul>
                 <li>"an array over time"</li>
                 <li>cancellable</li>
                 <li>lazy</li>
             </ul>
-            </p>
 
             <aside class="notes">
                 "Lazy" analogy: function
@@ -520,7 +518,7 @@ export class ProductsComponent {
             </section>
         </section>
         <section>
-            <h2>Async Pipe</h2>
+            <h3>Async Pipe</h3>
             <ul>
                 <li>subscribes to an Observable</li>
                 <li>automatically unsubscribes when the component is destroyed</li>
@@ -538,6 +536,44 @@ export class ProductsComponent {
                 <li>Always unsubscribe from Observables</li>
                 <li>Use Async Pipe wherever possible</li>
             </ul>
+        </section>
+
+        <section>
+            <h2>Forms</h2>
+        </section>
+
+        <section>
+            <h3>Reactive Forms</h3>
+            <pre><code class="ts" data-noescape data-line-numbers="3|3,6|3,6,7">@Component({
+  selector: 'app-search',
+  template: `&lt;input type="text" [formControl]="searchTerm" placeholder="Search"&gt;`,
+})
+export class SearchComponent {
+  searchTerm = new FormControl();
+  searchTerms$: Observable&lt;string&gt; = this.searchTerm.valueChanges;
+}
+            </code></pre>
+        </section>
+
+        <section>
+            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-search',
+  template:
+    `&lt;input type="text" [formControl]="searchTerm" placeholder="Search"&gt;
+     &lt;div *ngFor="let p of products$ | async"&gt;{{ p.name }}&lt;/div&gt;`,
+})
+export class SearchComponent {
+  searchTerm = new FormControl();
+
+  products$ = this.searchTerm.valueChanges.pipe(
+    <span class="fragment" data-2fragment-index="1">debounceTime(500),</span>
+    <span class="fragment" data-2fragment-index="2">distinctUntilChanged(),</span>
+    <span class="fragment" data-fragment-index="0">switchMap((searchTerm) => this.productsService.findProducts(searchTerm))</span>
+  );
+
+  constructor(private productsService: ProductsService) {}
+}
+            </code></pre>
         </section>
         <!-- TODO -->
         <!-- Operators that should be handled: -->
