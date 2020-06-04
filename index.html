@@ -35,6 +35,11 @@
         .reveal .fragment.visible:not(.current-fragment):not(span) {
             display: none;
         }
+
+        .reveal .flex-column-centered {
+            display: flex;
+            align-items: center;
+        }
     </style>
 
     <!-- Printing and PDF exports -->
@@ -449,7 +454,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 }
 					</code></pre>
             <aside class="notes">
-                Use Async Pipe
+                Or use Async Pipe
             </aside>
         </section>
 
@@ -592,6 +597,154 @@ export class SearchComponent {
 
             </section>
 
+        </section>
+
+        <section>
+            <h2>Summary</h2>
+            <ul>
+                <li>Reactive Forms provide Observables for value changes</li>
+                <li>Use switchMap to cancel inner Observables</li>
+            </ul>
+        </section>
+
+        <section>
+            <h3>Error Handling</h3>
+        </section>
+
+        <section>
+            <h3>Remember the error callback?</h3>
+            <pre><code class="ts" data-trim>
+someObservable$.subscribe(
+  value => console.log(value),
+  error => console.error(error)
+);
+					</code></pre>
+        </section>
+
+        <section>
+            <h3>What if I don't subscribe?</h3>
+
+            <p class="fragment">(because I'm using the Async Pipe or while manipulating the stream)</p>
+            <aside class="notes">
+                In Async Pipe or while manipulating the stream
+            </aside>
+        </section>
+
+        <section>
+            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-error-handling',
+  template: `&lt;input type="text" [formControl]="searchTerm" placeholder="Search"/&gt;
+    &lt;div *ngFor="let p of products$ | async">{{ p.name }}&lt;/div&gt;
+    &lt;div *ngIf="errorMessage">{{ errorMessage }}&lt;/div&gt;`,
+})
+export class ErrorHandlingComponent {
+  searchTerm = new FormControl();
+  errorMessage = '';
+
+  products$ = this.searchTerm.valueChanges.pipe(
+    tap(() => (this.errorMessage = '')),
+    debounceTime(500),
+    distinctUntilChanged(),
+    switchMap((searchTerm) => this.productsService.findProducts(searchTerm)),
+    catchError((error) => { this.errorMessage = error.message; return of([]); })
+  );
+
+  constructor(private productsService: ProductsService) {}
+}
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Router</h2>
+        </section>
+
+        <section>
+            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-router',
+  template: `&lt;div&gt;&lt;a *ngFor="let c of alphabet" [routerLink]="c"&gt;[{{ c }}] &lt;/a&gt;&lt;/div&gt;
+             &lt;div *ngFor="let p of products$ | async"&gt;{{ p.name }}&lt;/div&gt;`,
+})
+export class RouterComponent {
+  readonly alphabet = [...'ABCDEFGHIJKLMNOPQURSTUVXYZ'];
+  products$: Observable&lt;Product[]&gt; = this.route.paramMap.pipe(
+    map((params) => params.get('char')),
+    switchMap((char) => this.productsService.getProducts(char))
+  );
+
+  constructor(
+    private route: ActivatedRoute,
+    private productsService: ProductsService
+  ) {}
+}
+            </code></pre>
+            <aside class="notes">
+            </aside>
+        </section>
+
+        <section>
+            <p>ActivatedRoute</p>
+            <pre><code class="ts" data-noescape data-line-numbers>// URL segments matched by this route
+url: Observable&lt;UrlSegment[]&gt;;
+// matrix parameters scoped to this route
+params: Observable&lt;Params&gt;;
+// query parameters shared by all the routes
+queryParams: Observable&lt;Params&gt;;
+// URL fragment shared by all the routes
+fragment: Observable&lt;string&gt;;
+// static and resolved data of this route
+data: Observable&lt;Data&gt;;
+// map of the required and optional parameters specific to the route
+get paramMap(): Observable&lt;ParamMap&gt;;
+// map of the query parameters available to all routes
+get queryParamMap(): Observable&lt;ParamMap&gt;;
+            </code></pre>
+            <aside class="notes">
+            </aside>
+        </section>
+
+        <section>
+            <h3>Router Events</h3>
+            <div class="flex-column-centered">
+                <pre><code class="ts" data-noescape data-line-numbers="7,10-12">@Component({
+  selector: 'app-router',
+})
+export class RouterComponent implements OnInit, OnDestroy {
+  private destroyed$ = new Subject&lt;void&gt;();
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    this.router.events
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe((event) => console.log(event));
+  }
+
+  ngOnDestroy() {
+    this.destroyed$.next();
+  }
+}
+                </code></pre>
+                <div class="fragment fade-up" style="margin-left: 2rem">
+                    <img src="images/router-events-log.jpg" alt="Router Events Log">
+                </div>
+            </div>
+            <aside class="notes">
+                One could use <code>NavigationStart</code> and <code>NavigationEnd</code> to show a loading indicator
+            </aside>
+        </section>
+
+        <section>
+            <h2>Summary</h2>
+            <p>Router API</p>
+            <ul>
+                <li>provides Observables for route params</li>
+                <li>provides Observable for router events </li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Thank you</h2>
+            <h3>🙇</h3>
         </section>
         <!-- TODO -->
         <!-- Operators that should be handled: -->
