@@ -743,6 +743,11 @@ export class RouterComponent implements OnInit, OnDestroy {
         </section>
 
         <section>
+            <h2>Question time</h2>
+            <blockquote>"If you ask questions, you cannot avoid answers."</blockquote>
+        </section>
+
+        <section>
             <h2>Thank you</h2>
             <h3>🙇</h3>
         </section>
@@ -758,39 +763,6 @@ export class RouterComponent implements OnInit, OnDestroy {
         <!-- Optional: -->
         <!-- share -->
         <!-- shareReplay -->
-
-
-        <section>
-            <section id="fragments">
-                <h2>Fragments</h2>
-                <p>Hit the next arrow...</p>
-                <p class="fragment">... to step through ...</p>
-                <p><span class="fragment">... a</span> <span class="fragment">fragmented</span> <span class="fragment">slide.</span>
-                </p>
-
-                <aside class="notes">
-                    This slide has fragments which are also stepped through in the notes window.
-                </aside>
-            </section>
-            <section>
-                <h2>Fragment Styles</h2>
-                <p>There's different types of fragments, like:</p>
-                <p class="fragment grow">grow</p>
-                <p class="fragment shrink">shrink</p>
-                <p class="fragment fade-out">fade-out</p>
-                <p>
-                    <span style="display: inline-block;" class="fragment fade-right">fade-right, </span>
-                    <span style="display: inline-block;" class="fragment fade-up">up, </span>
-                    <span style="display: inline-block;" class="fragment fade-down">down, </span>
-                    <span style="display: inline-block;" class="fragment fade-left">left</span>
-                </p>
-                <p class="fragment fade-in-then-out">fade-in-then-out</p>
-                <p class="fragment fade-in-then-semi-out">fade-in-then-semi-out</p>
-                <p>Highlight <span class="fragment highlight-red">red</span> <span
-                        class="fragment highlight-blue">blue</span> <span class="fragment highlight-green">green</span>
-                </p>
-            </section>
-        </section>
 
         <section id="themes">
             <h2>Themes</h2>
@@ -829,93 +801,6 @@ export class RouterComponent implements OnInit, OnDestroy {
                 -
                 <a href="#"
                    onclick="document.getElementById('theme').setAttribute('href','css/theme/solarized.css'); return false;">Solarized</a>
-            </p>
-        </section>
-
-        <section>
-            <section data-background="#dddddd">
-                <h2>Slide Backgrounds</h2>
-                <p>
-                    Set <code>data-background="#dddddd"</code> on a slide to change the background color. All CSS color
-                    formats are supported.
-                </p>
-                <a href="#" class="navigate-down">
-                    <img width="178" height="238" data-src="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png"
-                         alt="Down arrow">
-                </a>
-            </section>
-            <section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png">
-                <h2>Image Backgrounds</h2>
-                <pre><code class="hljs html">&lt;section data-background="image.png"&gt;</code></pre>
-            </section>
-            <section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png"
-                     data-background-repeat="repeat" data-background-size="100px">
-                <h2>Tiled Backgrounds</h2>
-                <pre><code class="hljs html" style="word-wrap: break-word;">&lt;section data-background="image.png" data-background-repeat="repeat" data-background-size="100px"&gt;</code></pre>
-            </section>
-            <section
-                    data-background-video="https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.mp4,https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.webm"
-                    data-background-color="#000000">
-                <div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
-                    <h2>Video Backgrounds</h2>
-                    <pre><code class="hljs html" style="word-wrap: break-word;">&lt;section data-background-video="video.mp4,video.webm"&gt;</code></pre>
-                </div>
-            </section>
-            <section data-background="http://i.giphy.com/90F8aUepslB84.gif">
-                <h2>... and GIFs!</h2>
-            </section>
-        </section>
-
-        <section data-transition="slide" data-background="#4d7e65" data-background-transition="zoom">
-            <h2>Background Transitions</h2>
-            <p>
-                Different background transitions are available via the backgroundTransition option. This one's called
-                "zoom".
-            </p>
-            <pre><code class="hljs javascript">Reveal.configure({ backgroundTransition: 'zoom' })</code></pre>
-        </section>
-
-        <section data-transition="slide" data-background="#b5533c" data-background-transition="zoom">
-            <h2>Background Transitions</h2>
-            <p>
-                You can override background transitions per-slide.
-            </p>
-            <pre><code class="hljs html" style="word-wrap: break-word;">&lt;section data-background-transition="zoom"&gt;</code></pre>
-        </section>
-
-        <section data-background-iframe="https://hakim.se" data-background-interactive>
-            <div style="position: absolute; width: 40%; right: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.5), 0 5px 25px rgba(0,0,0,0.2); background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px; font-size: 20px; text-align: left;">
-                <h2>Iframe Backgrounds</h2>
-                <p>Since reveal.js runs on the web, you can easily embed other web content. Try interacting with the
-                    page in the background.</p>
-            </div>
-        </section>
-
-        <section>
-            <h2>Pretty Code</h2>
-            <pre><code class="hljs" data-trim data-line-numbers="4,8-9">
-import React, { useState } from 'react';
-
-function Example() {
-  const [count, setCount] = useState(0);
-
-  return (
-    &lt;div&gt;
-      &lt;p&gt;You clicked {count} times&lt;/p&gt;
-      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
-        Click me
-      &lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-					</code></pre>
-        </section>
-
-        <section>
-            <h2>Intergalactic Interconnections</h2>
-            <p>
-                You can link between slides internally,
-                <a href="#/2/3">like this</a>.
             </p>
         </section>
 
