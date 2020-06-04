@@ -460,8 +460,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
         <section>
             <h3>Async Pipe</h3>
-            <section data-transition="slide-in none-out">
-            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+            <pre class="fragment none"><code class="ts" data-noescape data-line-numbers>@Component({
   selector: 'app-products',
   template:
   `&lt;ul&gt;
@@ -477,13 +476,9 @@ export class ProductsComponent implements OnInit {
     this.products$ = this.productsService.loadProducts();
   }
 }
-					</code></pre>
-            <aside class="notes">
-                Subscribes and automatically unsubscribes when component is destroyed
-            </aside>
-            </section>
-            <section data-transition="none-in slide-out">
-            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+            </code></pre>
+
+            <pre class="fragment none"><code class="ts" data-noescape data-line-numbers>@Component({
   selector: 'app-products',
   template:
   `&lt;ul&gt;
@@ -495,13 +490,14 @@ export class ProductsComponent {
 
   constructor(private productsService: ProductsService) {}
 }
-					</code></pre>
-                <aside class="notes">
-                  We don't even need <code>ngOnInit</code> anymore
-                </aside>
-            </section>
+            </code></pre>
+            <aside class="notes">
+                <ul>
+                    <li>Subscribes and automatically unsubscribes when component is destroyed</li>
+                    <li>We don't even need <code>ngOnInit</code> anymore</li>
+                </ul>
+            </aside>
         </section>
-
         <section>
             <h3>Async Pipe</h3>
             <ul>
@@ -631,7 +627,7 @@ someObservable$.subscribe(
         </section>
 
         <section>
-            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+            <pre><code class="ts" data-noescape data-line-numbers="|5,9|5,9,12|5,9,12,16">@Component({
   selector: 'app-error-handling',
   template: `&lt;input type="text" [formControl]="searchTerm" placeholder="Search"/&gt;
     &lt;div *ngFor="let p of products$ | async">{{ p.name }}&lt;/div&gt;
@@ -652,6 +648,67 @@ export class ErrorHandlingComponent {
   constructor(private productsService: ProductsService) {}
 }
             </code></pre>
+            <aside class="notes">
+                What happens if I do this?<br>
+                The <code>catchError</code> completes the Observable. We will not get any more input changes.
+            </aside>
+        </section>
+
+        <section>
+            <h3>Error Isolation</h3>
+            <pre><code class="ts" data-noescape data-line-numbers="6-13">
+  products$ = this.searchTerm.valueChanges.pipe(
+    tap(() => (this.errorMessage = '')),
+    debounceTime(500),
+    distinctUntilChanged(),
+    switchMap((searchTerm) =>
+      this.productsService.findProducts(searchTerm).pipe(
+        catchError((error) => {
+          this.errorMessage = error.message;
+          return of([]);
+        })
+      )
+    )
+    // no catchError here!
+  );
+            </code></pre>
+            <aside class="notes">
+                <ul>
+                    <li>Create a pipe to isolate the error</li>
+                    <li>From <code>switchMaps</code> point of view, there is no error</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section>
+            <h3>Catch and rethrow</h3>
+            <pre><code class="ts" data-noescape data-line-numbers="">export class ProductsService {
+
+  findProducts(query: string): Observable&lt;Product[]&gt; {
+    return this.queryProducts(query).pipe(
+      catchError((error) => {
+        console.error('GET failed', error);
+        const message = "We cannot find your product. Please try again later.";
+        return throwError(message);
+      }),
+      map((response) => response.products)
+    );
+  }
+}
+            </code></pre>
+            <aside class="notes">
+                <ul>
+                </ul>
+            </aside>
+        </section>
+
+        <section>
+            <h2>Summary</h2>
+            <ul>
+                <li>Use catchError to handle errors</li>
+                <li>Pay attention to error isolation</li>
+                <li>Handle errors in service and component</li>
+            </ul>
         </section>
 
         <section>
@@ -763,46 +820,6 @@ export class RouterComponent implements OnInit, OnDestroy {
         <!-- Optional: -->
         <!-- share -->
         <!-- shareReplay -->
-
-        <section id="themes">
-            <h2>Themes</h2>
-            <p>
-                reveal.js comes with a few themes built in: <br>
-                <!-- Hacks to swap themes after the page has loaded. Not flexible and only intended for the reveal.js demo deck. -->
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/black.css'); return false;">Black
-                    (default)</a> -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/white.css'); return false;">White</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/league.css'); return false;">League</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/sky.css'); return false;">Sky</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/beige.css'); return false;">Beige</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/simple.css'); return false;">Simple</a>
-                <br>
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/serif.css'); return false;">Serif</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/blood.css'); return false;">Blood</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/night.css'); return false;">Night</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/moon.css'); return false;">Moon</a>
-                -
-                <a href="#"
-                   onclick="document.getElementById('theme').setAttribute('href','css/theme/solarized.css'); return false;">Solarized</a>
-            </p>
-        </section>
 
     </div>
 </div>
