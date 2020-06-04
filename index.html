@@ -233,6 +233,10 @@ characters$
                     </ul>
                 </div>
             </div>
+
+            <aside class="notes">
+                Why do have have to care about Observables as Angular developers?
+            </aside>
         </section>
 
         <section>
@@ -387,32 +391,6 @@ export class ProductsComponent implements OnInit {
         </section>
 
         <section>
-                <pre><code class="ts" data-noescape data-line-numbers>@Component({
-  selector: 'app-products',
-  template:
-  `&lt;ul&gt;
-     &lt;li *ngFor="let p of products">{{p.name}}: {{p.price}}&lt;/li&gt;
-   &lt;/ul&gt;`
-})
-export class ProductsComponent implements OnInit {
-  products: Product[];
-  private subscription: Subscription
-
-  constructor(private productService: ProductService) {}
-
-  ngOnInit() {
-    this.productService.loadProducts().subscribe(
-      products => (this.products = products)
-    );
-  }
-}
-					</code></pre>
-            <aside class="notes">
-                Back to our template to show the list of products. What's wrong here?
-            </aside>
-        </section>
-
-        <section>
             <h3>Always unsubscribe from Observables to avoid memory leaks</h3>
             <aside class="notes">
                 There are three common ways to unsubscribe (presented in next slides)
@@ -481,7 +459,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   selector: 'app-products',
   template:
   `&lt;ul&gt;
-     &lt;li *ngFor="let p of products | async">{{p.name}}: {{p.price}}&lt;/li&gt;
+     &lt;li *ngFor="let p of products$ | async">{{p.name}}: {{p.price}}&lt;/li&gt;
    &lt;/ul&gt;`
 })
 export class ProductsComponent implements OnInit {
@@ -503,7 +481,7 @@ export class ProductsComponent implements OnInit {
   selector: 'app-products',
   template:
   `&lt;ul&gt;
-     &lt;li *ngFor="let p of products | async">{{p.name}}: {{p.price}}&lt;/li&gt;
+     &lt;li *ngFor="let p of products$ | async">{{p.name}}: {{p.price}}&lt;/li&gt;
    &lt;/ul&gt;`
 })
 export class ProductsComponent {
@@ -517,6 +495,7 @@ export class ProductsComponent {
                 </aside>
             </section>
         </section>
+
         <section>
             <h3>Async Pipe</h3>
             <ul>
@@ -556,7 +535,8 @@ export class SearchComponent {
         </section>
 
         <section>
-            <pre><code class="ts" data-noescape data-line-numbers>@Component({
+            <section data-transition="slide-in none-out">
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
   selector: 'app-search',
   template:
     `&lt;input type="text" [formControl]="searchTerm" placeholder="Search"&gt;
@@ -566,14 +546,36 @@ export class SearchComponent {
   searchTerm = new FormControl();
 
   products$ = this.searchTerm.valueChanges.pipe(
-    <span class="fragment" data-2fragment-index="1">debounceTime(500),</span>
-    <span class="fragment" data-2fragment-index="2">distinctUntilChanged(),</span>
-    <span class="fragment" data-fragment-index="0">switchMap((searchTerm) => this.productsService.findProducts(searchTerm))</span>
+
+
+    <span class="fragment">mergeMap((searchTerm) => this.productsService.findProducts(searchTerm))</span>
   );
 
   constructor(private productsService: ProductsService) {}
 }
             </code></pre>
+            </section>
+            <section data-transition="none-in slide-out">
+                <pre><code class="ts" data-noescape data-line-numbers>@Component({
+  selector: 'app-search',
+  template:
+    `&lt;input type="text" [formControl]="searchTerm" placeholder="Search"&gt;
+     &lt;div *ngFor="let p of products$ | async"&gt;{{ p.name }}&lt;/div&gt;`,
+})
+export class SearchComponent {
+  searchTerm = new FormControl();
+
+  products$ = this.searchTerm.valueChanges.pipe(
+    <span class="fragment">debounceTime(500),</span>
+    <span class="fragment">distinctUntilChanged(),</span>
+    switchMap((searchTerm) => this.productsService.findProducts(searchTerm))
+  );
+
+  constructor(private productsService: ProductsService) {}
+}
+            </code></pre>
+            </section>
+
         </section>
         <!-- TODO -->
         <!-- Operators that should be handled: -->
